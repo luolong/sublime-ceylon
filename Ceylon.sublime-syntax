@@ -1,0 +1,36 @@
+%YAML 1.2
+---
+# http://www.sublimetext.com/docs/3/syntax.html
+name: Ceylon
+file_extensions:
+  - ceylon
+scope: source.ceylon
+
+contexts:
+  main:
+    - include: module_manifest
+    - include: package_manifest
+    - include: source_artifact
+
+  module_manifest:
+    - include: comments
+
+  package_manifest: 
+    - include: comments
+
+  source_artifact:
+    - include: comments
+
+  comments:
+    - match: /\*
+      scope: punctuation.definition.comment.ceylon
+      push:
+        - meta_scope: comment.block.ceylon
+        - match: \*/
+          scope: punctuation.definition.comment.ceylon
+          pop: true
+    - match: \s*((//).*$\n?)
+      captures:
+        1: comment.line.double-slash.ceylon
+        2: punctuation.definition.comment.ceylon
+
