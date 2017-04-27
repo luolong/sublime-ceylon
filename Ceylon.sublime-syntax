@@ -10,16 +10,76 @@ contexts:
   main:
     - include: module_manifest
     - include: package_manifest
-    - include: source_artifact
+    - include: compilation_unit
 
   module_manifest:
     - include: comments
+    - include: annotations
 
   package_manifest: 
     - include: comments
 
-  source_artifact:
+  compilation_unit:
     - include: comments
+    - include: import
+
+  annotations:
+    - include: docstring
+
+  docstring:
+    - include: VerbatimStringLiteral
+    - include: StringLiteral
+
+  StringLiteral:
+    - match: '"'
+      scope: punctuation.definition.string.begin.ceylon
+      push:
+        - meta_scope: string.quoted.double.ceylon
+        - match: '\\(?=[\n\r])'
+          scope: constant.character.escape.ceylon
+        - include: EscapeSequence
+        - include: InterpolatedExpression
+        - match: '"'
+          scope: punctuation.definition.string.end.ceylon
+          pop: true
+
+  VerbatimStringLiteral:
+    - match: '"""'
+      scope: punctuation.definition.string.begin.ceylon
+      push:
+        - meta_scope: string.quoted.triple.ceylon
+        - match: '"""'
+          scope: punctuation.definition.string.end.ceylon
+          pop: true
+
+  EscapeSequence:
+    - match: \\[btnfre\\"'`0]
+      scope: constant.character.escape.ceylon
+    - match: '\\\{#(?:[[:xdigit:]]{2,6})\}'
+      scope: constant.character.escape.ceylon
+    - match: '\\\{[[:alpha:]][[:alnum:]_]*(?: [[:alnum:]_]+)*\}'
+      scope: constant.character.escape.ceylon
+
+  InterpolatedExpression:
+    - match: '``'
+      scope: punctuation.definition.string.interpolated.begin.ceylon
+      push:
+        - meta_scope: string.interpolated.backtick.ceylon
+        - meta_content_scope: source.ceylon.embedded.expression
+        - match: '``'
+          scope: punctuation.definition.string.interpolated.end.ceylon
+          pop: true
+        - include: expression
+
+  expression:
+    - include: LiteralExpression
+
+  LiteralExpression:
+    - include: StringLiteral
+
+  import:
+    - match: \bimport\b
+      scope: keyword.other.import.ceylon
 
   comments:
     - match: /\*
@@ -33,4 +93,3 @@ contexts:
       captures:
         1: comment.line.double-slash.ceylon
         2: punctuation.definition.comment.ceylon
-
